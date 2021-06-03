@@ -1,0 +1,39 @@
+import pandas as pd
+import numpy as np
+from collections import Counter
+
+def fill_missing_value(country_group,d_columns):
+  df =pd.DataFrame(columns = d_columns)
+  for country, frame in country_group:
+    if frame['daily_vaccinations'].sum()== 0.0:
+      frame['daily_vaccinations'].fillna(0, inplace=True)
+      
+    else:
+      min_value = frame["daily_vaccinations"].min()
+      frame['daily_vaccinations'].fillna(min_value, inplace=True)
+    frame["country"]=country
+    df= df.append(frame,ignore_index=True)
+  return df
+
+def take_top_3_countries(df):
+  median_list={}
+  for country, frame in country_group:
+    med= frame['daily_vaccinations'].median()
+    median_list[country]=med
+  count = Counter(median_list)
+  top_3 =count.most_common(3) 
+  print(top_3)
+  return top_3
+
+def find_total_vaccinations(df, date):
+  m_sum=0
+  m_list= list (df['date'].loc[lambda x: x=='1/6/2021'].index)
+  for i in m_list:
+    m_sum += df['daily_vaccinations'].iloc[i]
+  print(m_sum)
+dataset = pd.read_csv("/content/sample_data/country_vaccination_stats.csv")
+country_group= dataset.groupby("country")
+df=fill_missing_value(country_group,list(dataset.columns.values))
+top_3= take_top_3_countries(df)
+
+find_total_vaccinations(df,'1/6/2021')
